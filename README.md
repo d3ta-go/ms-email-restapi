@@ -1,2 +1,3 @@
-# project-template
-DDD Project Template in Go
+# ms-email-restapi
+
+MicroService Interface/Presentation App: Email RestAPI

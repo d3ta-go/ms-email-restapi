@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/d3ta-go/project-template/cmd"
+	"github.com/d3ta-go/ms-email-restapi/cmd"
 )
 
 func main() {
