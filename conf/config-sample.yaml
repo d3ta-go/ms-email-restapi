@@ -15,7 +15,7 @@ applications:
         showEngineHeader: true
         displayOpenAPI: true
         listener:
-          port: 2020
+          port: 20201
         middlewares:
           logger:
             enable: true
