@@ -1,0 +1,437 @@
+openapi: "3.0.3"
+
+info:
+  title: '{{index . "info.Title"}}'
+  description: '{{index . "info.Description"}}'
+  contact:
+    name: '{{index . "info.Contact.Name"}}'
+    url: '{{index . "info.Contact.URL"}}'
+    email: '{{index . "info.Contact.Email"}}'
+  license:
+    name: '{{index . "info.License.Name"}}'
+    url: '{{index . "info.License.URL"}}'
+  version: '{{index . "info.Version"}}'
+
+servers:
+  - url: '{scheme}://{host}'
+    description: Server
+    variables:
+      scheme:
+        description: The API is accessible via https and http
+        enum:
+          - https
+          - http
+        default: http
+      host:
+        default: '{{index . "server.URL.Host.Default"}}'
+
+tags:
+  - name: Systems
+    description: >-
+      [Generic (sub)Domain] Systems
+  - name: Email
+    description: >-
+      [Generic (sub)Domain] Email (using DDD layered architecture, [G]ORM, smtp)
+security:
+  - bearerAuth: []
+
+paths:
+  # System
+  /system/health:
+    get:
+      tags:
+        - Systems
+      security: []
+      operationId: Systems.CheckHealth
+      summary: System Health Check
+      responses:
+        default:
+          $ref: '#/components/responses/GeneralResponse'
+  
+  # Email
+  /api/v1/email/send:
+    post:
+      tags:
+        - Email
+      operationId: email.Send
+      summary: Send Email using template
+      requestBody:
+        $ref: '#/components/requestBodies/email.Send.Request'
+      responses:
+        default:
+          $ref: '#/components/responses/GeneralResponse'
+
+  /api/v1/email/templates/list-all:
+    get:
+      tags:
+        - Email
+      operationId: email.Template.ListAll
+      summary: List All Email Template
+      responses:
+        default:
+          $ref: '#/components/responses/GeneralResponse'
+  
+  /api/v1/email/template:
+    post:
+      tags:
+        - Email
+      operationId: email.Template.Create
+      summary: Create new Email Template
+      requestBody:
+        $ref: '#/components/requestBodies/email.Template.Create.Request'
+      responses:
+        default:
+          $ref: '#/components/responses/GeneralResponse'
+  
+  /api/v1/email/template/{code}:
+    get:
+      tags:
+        - Email
+      operationId: email.Template.FindByCode
+      summary: Find Email Template by Code
+      parameters:
+        - $ref: '#/components/parameters/email.param.emailTemplateCode'
+      responses:
+        default:
+          $ref: '#/components/responses/GeneralResponse'
+    delete:
+      tags:
+        - Email
+      operationId: email.Template.Delete
+      summary: Delete Email Template by Code
+      parameters:
+        - $ref: '#/components/parameters/email.param.emailTemplateCode'
+      responses:
+        default:
+          $ref: '#/components/responses/GeneralResponse'
+  
+  /api/v1/email/template/update/{code}:
+    put:
+      tags:
+        - Email
+      operationId: email.Template.Update
+      summary: Update Email Template by Code
+      parameters:
+        - $ref: '#/components/parameters/email.param.emailTemplateCode'
+      requestBody:
+        $ref: '#/components/requestBodies/email.Template.Update.Request'
+      responses:
+        default:
+          $ref: '#/components/responses/GeneralResponse'
+  
+  /api/v1/email/template/set-active/{code}:
+    put:
+      tags:
+        - Email
+      operationId: email.Template.SetActive
+      summary: Set Active Email Template by Code
+      parameters:
+        - $ref: '#/components/parameters/email.param.emailTemplateCode'
+      requestBody:
+        $ref: '#/components/requestBodies/email.Template.SetActive.Request'
+      responses:
+        default:
+          $ref: '#/components/responses/GeneralResponse'
+
+components:
+  #SecuritySchemes
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  # Parameters
+  parameters:
+    # System
+    
+    # Email
+    email.Template.Create.Request:
+      description: Create Email Template Request
+      required: true
+      content:
+        application/json:
+          schema:
+             $ref: '#/components/schemas/email.Template.Create.Request'
+          examples:
+            PlainTextSample:
+              value:
+                code: "plain-email-template-code"
+                name: "Plain Text Email Template Name"
+                isActive: true
+                emailFormat: "TEXT"
+                template:
+                  subjectTpl: "Subject Template"
+                  bodyTpl: "replace bodyTpl value from: http://{{index . "server.URL.Host.Default"}}/openapi/docs/swagger-ui/assets/examples/plain-text-template.json"
+            HTMLSample:
+              value:
+                code: "html-email-template-code"
+                name: "HTML Email Template Name"
+                isActive: true
+                emailFormat: "HTML"
+                template:
+                  subjectTpl: "Subject Template"
+                  bodyTpl: "replace bodyTpl value from: http://{{index . "server.URL.Host.Default"}}/openapi/docs/swagger-ui/assets/examples/html-template.json"
+    
+    email.Template.Update.Request:
+      description: Update Email Template Request
+      required: true
+      content:
+        application/json:
+          schema:
+             $ref: '#/components/schemas/email.Template.Update.Request'
+          examples:
+            PlainTextSample:
+              value:
+                name: "Plain Text Email Template Name"
+                isActive: true
+                emailFormat: "TEXT"
+                template:
+                  subjectTpl: "Subject Template"
+                  bodyTpl: "replace bodyTpl value from: http://{{index . "server.URL.Host.Default"}}/openapi/docs/swagger-ui/assets/examples/plain-text-template.json"
+            HTMLSample:
+              value:
+                name: "HTML Email Template Name"
+                isActive: true
+                emailFormat: "HTML"
+                template:
+                  subjectTpl: "Subject Template"
+                  bodyTpl: "replace bodyTpl value from: http://{{index . "server.URL.Host.Default"}}/openapi/docs/swagger-ui/assets/examples/html-template.json"
+    
+    email.Template.SetActive.Request:
+      description: Set Active Email Template Request
+      required: true
+      content:
+        application/json:
+          schema:
+             $ref: '#/components/schemas/email.Template.SetActive.Request'
+          examples:
+            Activate:
+              value:
+                isActive: true
+            InActivate:
+              value:
+                isActive: false
+
+    email.Send.Request:
+      description: Send Email
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/email.Send.Request'
+          examples:
+            Simple:
+              value:
+                templateCode: activate-registration-html
+                from:
+                  email: d3tago.from@domain.tld
+                  name: D3TA Golang
+                to:
+                  email: d3ta.to@domain.tld
+                  name: D3TA Golang To
+                templateData:
+                  Header.Name: John Doe
+                  Body.UserAccount: john.doe
+                  Body.ActivationURL: https://google.com
+                  Footer.Name: Customer Service
+                processingType: SYNC
+            WithCC:
+              value:
+                templateCode: activate-registration-html
+                from:
+                  email: d3tago.from@domain.tld
+                  name: D3TA Golang
+                to:
+                  email: d3tago.to@domain.tld
+                  name: D3TA Golang To
+                cc:
+                  - email: d3tago.cc1@domain.tld
+                    name: D3TA Golang CC 1
+                  - email: d3tago.cc2@gmail.tld
+                    name: D3TA Golang CC 2
+                templateData:
+                  Header.Name: John Doe
+                  Body.UserAccount: john.doe
+                  Body.ActivationURL: https://google.com
+                  Footer.Name: Customer Service
+                processingType: SYNC
+            WithBCC:
+              value:
+                templateCode: activate-registration-html
+                from:
+                  email: d3tago.from@domain.tld
+                  name: D3TA Golang
+                to:
+                  email: d3tago.to@domain.tld
+                  name: D3TA Golang To
+                bcc:
+                  - email: d3tago.bcc1@domain.tld
+                    name: D3TA Golang BCC 1
+                  - email: d3tago.bcc2@gmail.tld
+                    name: D3TA Golang BCC 2
+                templateData:
+                  Header.Name: John Doe
+                  Body.UserAccount: john.doe
+                  Body.ActivationURL: https://google.com
+                  Footer.Name: Customer Service
+                processingType: ASYNC
+            WithCCAndBCC:
+              value:
+                templateCode: activate-registration-html
+                from:
+                  email: d3tago.from@domain.tld
+                  name: D3TA Golang
+                to:
+                  email: d3tago.to@domain.tld
+                  name: D3TA Golang To
+                cc:
+                  - email: d3tago.cc1@domain.tld
+                    name: D3TA Golang CC 1
+                  - email: d3tago.cc2@gmail.tld
+                    name: D3TA Golang CC 2
+                bcc:
+                  - email: d3tago.bcc1@domain.tld
+                    name: D3TA Golang BCC 1
+                  - email: d3tago.bcc2@gmail.tld
+                    name: D3TA Golang BCC 2
+                templateData:
+                  Header.Name: John Doe
+                  Body.UserAccount: john.doe
+                  Body.ActivationURL: https://google.com
+                  Footer.Name: Customer Service
+                processingType: ASYNC
+
+  responses:
+    GeneralResponse:
+      description: General Response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GeneralResponse'
+
+  # Schemas
+  schemas:
+    GeneralResponse:
+      required:
+        - status
+        - response
+        - serverInfo
+      properties:
+        status:
+          type: string
+          enum:
+            - OK
+            - ERROR
+          example: OK
+        response:
+          type: object
+        serverInfo:
+          type: object
+
+    # Email
+    email.Template.Create.Request:
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/email.Template.field.code'
+        name:
+          $ref: '#/components/schemas/email.Template.field.name'
+        isActive:
+          $ref: '#/components/schemas/email.Template.field.isActive'
+        emailFormat:
+          $ref: '#/components/schemas/email.Template.field.emailFormat'
+        template:
+          $ref: '#/components/schemas/email.Template.obj.template'
+
+    email.Template.Update.Request:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/email.Template.field.name'
+        isActive:
+          $ref: '#/components/schemas/email.Template.field.isActive'
+        emailFormat:
+          $ref: '#/components/schemas/email.Template.field.emailFormat'
+        template:
+          $ref: '#/components/schemas/email.Template.obj.template'
+
+    email.Template.SetActive.Request:
+      type: object
+      properties:
+        isActive:
+          $ref: '#/components/schemas/email.Template.field.isActive'
+    
+    email.Template.field.code:
+      type: string
+      example: email-template-code
+    email.Template.field.name:
+      type: string
+      example: Email Template
+    email.Template.field.isActive:
+      type: boolean
+      example: true
+    email.Template.field.emailFormat:
+      type: string
+      enum:
+        - HTML
+        - TEXT
+    email.Template.obj.template:
+      type: object
+      properties:
+        subjectTpl:
+          $ref: '#/components/schemas/email.Template.field.subjectTpl'
+        bodyTpl:
+          $ref: '#/components/schemas/email.Template.field.bodyTpl'
+    
+    email.Template.field.subjectTpl:
+      type: string
+      example: Email Subject
+    email.Template.field.bodyTpl:
+      type: string
+      example: Please refer to examples url
+    
+    email.Send.Request:
+      type: object
+      properties:
+        templateCode:
+          $ref: '#/components/schemas/email.Template.field.code'
+        from:
+          $ref: '#/components/schemas/email.send.obj.emailAddress'
+        to:
+          $ref: '#/components/schemas/email.send.obj.emailAddress'
+        cc:
+          $ref: '#/components/schemas/email.send.arr.emailAddress'
+        bcc:
+          $ref: '#/components/schemas/email.send.arr.emailAddress'
+        templateData:
+          type: object
+          description: >- 
+            Template Data (depend on email template)
+        processingType:
+          $ref: '#/components/schemas/email.send.field.processingType'
+    
+    email.send.arr.emailAddress:
+      type: array
+      items:
+        $ref: '#/components/schemas/email.send.obj.emailAddress'
+    
+    email.send.obj.emailAddress:
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/email.send.field.email'
+        name:
+          $ref: '#/components/schemas/email.send.field.name'
+          
+    email.send.field.email:
+      type: string
+      format: email
+    email.send.field.name:
+      type: string
+    email.send.field.processingType:
+      type: string
+      enum:
+        - SYNC
+        - ASYNC
+      description: Processing Type [ SYNC (Synchronous) or ASYNC (Asyncrounous) ]
