@@ -143,8 +143,19 @@ components:
   
   # Parameters
   parameters:
-    # System
-    
+    # Emails
+    email.param.emailTemplateCode:
+      in: path
+      name: code
+      description: >-
+        Email Template Code
+      schema:
+        type: string
+      required: true
+      example: activate-registration
+
+  # Request Bodies
+  requestBodies:
     # Email
     email.Template.Create.Request:
       description: Create Email Template Request
