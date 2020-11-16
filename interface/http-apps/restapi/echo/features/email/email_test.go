@@ -9,6 +9,7 @@ import (
 
 	ht "github.com/d3ta-go/ms-email-restapi/interface/http-apps/restapi/echo/features/helper_test"
 	"github.com/d3ta-go/system/system/initialize"
+	"github.com/d3ta-go/system/system/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,7 +42,6 @@ func TestEmail_ListAllEmailTemplate(t *testing.T) {
 	}
 	c.Set("identity.token.jwt", token)
 	c.Set("identity.token.jwt.claims", claims)
-	fmt.Println(token)
 
 	// test feature
 	email, err := NewFEmail(handler)
@@ -57,15 +57,26 @@ func TestEmail_ListAllEmailTemplate(t *testing.T) {
 }
 
 func TestEmail_CreateEmailTemplate(t *testing.T) {
+	h := ht.NewHandler()
+
+	viper, err := h.GetViper("test-data")
+	if err != nil {
+		t.Errorf("GetViper: %s", err.Error())
+	}
+	testData := viper.GetStringMapString("test-data.email.email-template.interface-layer.features.create.request")
+
+	unique := utils.GenerateUUID()
+	etCode := fmt.Sprintf(testData["et-code"], unique)
+	etName := fmt.Sprintf(testData["et-name"], unique)
 	// client request
 	reqDTO := `{
-	"code": "test.code.04",
-	"name": "Template Name 04",
-	"isActive": true,
-	"emailFormat": "TEXT",
+	"code": "` + etCode + `",
+	"name": "` + etName + `",
+	"isActive": ` + testData["et-is-active"] + `,
+	"emailFormat": "` + testData["et-email-format"] + `",
 	"template": {
-		"subjectTpl": "Subject Template 04",
-		"bodyTpl": "{{define \"T\"}}Body Template 04{{end}}"
+		"subjectTpl": "` + testData["et-tpl-subject"] + `",
+		"bodyTpl": "` + testData["et-tpl-body"] + `"
 	}
 }`
 
@@ -103,11 +114,33 @@ func TestEmail_CreateEmailTemplate(t *testing.T) {
 
 	if assert.NoError(t, email.CreateEmailTemplate(c)) {
 		assert.Equal(t, http.StatusOK, res.Code)
+		// save to test-data
+		// save result for next test
+		viper.Set("test-data.email.email-template.interface-layer.features.create.response.json", res.Body.String())
+		viper.Set("test-data.email.email-template.interface-layer.features.find-by-code.request.et-code", etCode)
+
+		viper.Set("test-data.email.email-template.interface-layer.features.update.request.et-code", etCode)
+		viper.Set("test-data.email.email-template.interface-layer.features.update.request.et-name", etName)
+
+		viper.Set("test-data.email.email-template.interface-layer.features.delete.request.et-code", etCode)
+		viper.Set("test-data.email.email-template.interface-layer.features.set-active.request.et-code", etCode)
+
+		if err := viper.WriteConfig(); err != nil {
+			t.Errorf("Error: viper.WriteConfig(), %s", err.Error())
+		}
 		t.Logf("RESPONSE.Email.CreateEmailTemplate: %s", res.Body.String())
 	}
 }
 
 func TestEmail_FindEmailTemplateByCode(t *testing.T) {
+	h := ht.NewHandler()
+
+	viper, err := h.GetViper("test-data")
+	if err != nil {
+		t.Errorf("GetViper: %s", err.Error())
+	}
+	testData := viper.GetStringMapString("test-data.email.email-template.interface-layer.features.find-by-code.request")
+
 	// client request
 	// --> set on context param [http method = GET]
 
@@ -120,7 +153,7 @@ func TestEmail_FindEmailTemplateByCode(t *testing.T) {
 
 	c := e.NewContext(req, res)
 	c.SetParamNames("code")
-	c.SetParamValues("test.code.04")
+	c.SetParamValues(testData["et-code"])
 
 	// handler
 	handler := ht.NewHandler()
@@ -147,19 +180,33 @@ func TestEmail_FindEmailTemplateByCode(t *testing.T) {
 
 	if assert.NoError(t, email.FindEmailTemplateByCode(c)) {
 		assert.Equal(t, http.StatusOK, res.Code)
+		// save to test-data
+		// save result for next test
+		viper.Set("test-data.email.email-template.interface-layer.features.find-by-code.response.json", res.Body.String())
+		if err := viper.WriteConfig(); err != nil {
+			t.Errorf("Error: viper.WriteConfig(), %s", err.Error())
+		}
 		t.Logf("RESPONSE.Email.FindEmailTemplateByCode: %s", res.Body.String())
 	}
 }
 
 func TestEmail_UpdateEmailTemplate(t *testing.T) {
+	h := ht.NewHandler()
+
+	viper, err := h.GetViper("test-data")
+	if err != nil {
+		t.Errorf("GetViper: %s", err.Error())
+	}
+	testData := viper.GetStringMapString("test-data.email.email-template.interface-layer.features.update.request")
+
 	// client request
 	reqDTO := `{
-	"name": "Template Name 04 Updated",
-	"isActive": true,
-	"emailFormat": "TEXT",
+	"name": "` + testData["et-name"] + ` Updated",
+	"isActive": ` + testData["et-is-active"] + `,
+	"emailFormat": "` + testData["et-email-format"] + `",
 	"template": {
-		"subjectTpl": "Subject Template 04 Updated",
-		"bodyTpl": "{{define \"T\"}}Body Template 04 Updated{{end}}"
+		"subjectTpl": "` + testData["et-tpl-subject"] + `",
+		"bodyTpl": "` + testData["et-tpl-body"] + `"
 	}
 }`
 
@@ -172,7 +219,7 @@ func TestEmail_UpdateEmailTemplate(t *testing.T) {
 
 	c := e.NewContext(req, res)
 	c.SetParamNames("code")
-	c.SetParamValues("test.code.04")
+	c.SetParamValues(testData["et-code"])
 
 	// handler
 	handler := ht.NewHandler()
@@ -199,14 +246,28 @@ func TestEmail_UpdateEmailTemplate(t *testing.T) {
 
 	if assert.NoError(t, email.UpdateEmailTemplate(c)) {
 		assert.Equal(t, http.StatusOK, res.Code)
+		// save to test-data
+		// save result for next test
+		viper.Set("test-data.email.email-template.interface-layer.features.update.response.json", res.Body.String())
+		if err := viper.WriteConfig(); err != nil {
+			t.Errorf("Error: viper.WriteConfig(), %s", err.Error())
+		}
 		t.Logf("RESPONSE.Email.UpdateEmailTemplate: %s", res.Body.String())
 	}
 }
 
 func TestEmail_SetActiveEmailTemplate(t *testing.T) {
+	h := ht.NewHandler()
+
+	viper, err := h.GetViper("test-data")
+	if err != nil {
+		t.Errorf("GetViper: %s", err.Error())
+	}
+	testData := viper.GetStringMapString("test-data.email.email-template.interface-layer.features.set-active.request")
+
 	// client request
 	reqDTO := `{
-	"isActive": true
+	"isActive": ` + testData["et-is-active"] + `
 }`
 
 	// setup echo
@@ -218,7 +279,7 @@ func TestEmail_SetActiveEmailTemplate(t *testing.T) {
 
 	c := e.NewContext(req, res)
 	c.SetParamNames("code")
-	c.SetParamValues("test.code.04")
+	c.SetParamValues(testData["et-code"])
 
 	// handler
 	handler := ht.NewHandler()
@@ -245,11 +306,25 @@ func TestEmail_SetActiveEmailTemplate(t *testing.T) {
 
 	if assert.NoError(t, email.SetActiveEmailTemplate(c)) {
 		assert.Equal(t, http.StatusOK, res.Code)
+		// save to test-data
+		// save result for next test
+		viper.Set("test-data.email.email-template.interface-layer.features.set-active.response.json", res.Body.String())
+		if err := viper.WriteConfig(); err != nil {
+			t.Errorf("Error: viper.WriteConfig(), %s", err.Error())
+		}
 		t.Logf("RESPONSE.Email.SetActiveEmailTemplate: %s", res.Body.String())
 	}
 }
 
 func TestEmail_DeleteEmailTemplate(t *testing.T) {
+	h := ht.NewHandler()
+
+	viper, err := h.GetViper("test-data")
+	if err != nil {
+		t.Errorf("GetViper: %s", err.Error())
+	}
+	testData := viper.GetStringMapString("test-data.email.email-template.interface-layer.features.delete.request")
+
 	// client request
 	// none
 
@@ -262,7 +337,7 @@ func TestEmail_DeleteEmailTemplate(t *testing.T) {
 
 	c := e.NewContext(req, res)
 	c.SetParamNames("code")
-	c.SetParamValues("test.code.04")
+	c.SetParamValues(testData["et-code"])
 
 	// handler
 	handler := ht.NewHandler()
@@ -289,31 +364,46 @@ func TestEmail_DeleteEmailTemplate(t *testing.T) {
 
 	if assert.NoError(t, email.DeleteEmailTemplate(c)) {
 		assert.Equal(t, http.StatusOK, res.Code)
+		// save to test-data
+		// save result for next test
+		viper.Set("test-data.email.email-template.interface-layer.features.delete.response.json", res.Body.String())
+		if err := viper.WriteConfig(); err != nil {
+			t.Errorf("Error: viper.WriteConfig(), %s", err.Error())
+		}
 		t.Logf("RESPONSE.Email.DeleteEmailTemplate: %s", res.Body.String())
 	}
 }
 
 func TestEmail_SendEmail(t *testing.T) {
+	h := ht.NewHandler()
+
+	viper, err := h.GetViper("test-data")
+	if err != nil {
+		t.Errorf("GetViper: %s", err.Error())
+	}
+	testData := viper.GetStringMapString("test-data.email.email.interface-layer.features.send.request")
+	testDataET := viper.GetStringMapString("test-data.email.email.interface-layer.features.send.request.email-template-data")
+
 	// client request
 	reqDTO := `{
-    "templateCode": "activate-registration-html",
-    "from": { "email": "d3tago.from@domain.tld", "name": "D3TA Golang" },
-    "to": { "email": "d3tago.test@outlook.com", "name": "D3TAgo Test (Outlook)" },
+    "templateCode": "` + testData["email-template-code"] + `",
+    "from": { "email": "` + testData["from-email"] + `", "name": "` + testData["from-name"] + `" },
+    "to": { "email": "` + testData["to-email"] + `", "name": "` + testData["to-name"] + `" },
     "cc": [
-        { "email": "d3tago.test@protonmail.com", "name": "D3TAgo Test CC 1 (Protonmail)" },
-        { "email": "d3tago.test.cc@tutanota.com", "name": "D3TAgo Test CC 2 (Tutanota)" }
+        { "email": "` + testData["cc-email-01"] + `", "name": "` + testData["cc-name-01"] + `" },
+        { "email": "` + testData["cc-email-02"] + `", "name": "` + testData["cc-name-02"] + `" }
     ],
     "bcc": [
-        { "email": "d3tago.test@tutanota.com", "name": "D3TAgo Test BCC 1 (Tutanota)" },
-		{ "email": "d3tago.test.bcc@outlook.com", "name": "D3TAgo Test BCC 2 (Outlook)" }
+        { "email": "` + testData["bcc-email-01"] + `", "name": "` + testData["bcc-name-01"] + `" },
+		{ "email": "` + testData["bcc-email-02"] + `", "name": "` + testData["bcc-name-02"] + `" }
     ],
     "templateData": {
-		"Header.Name": "John Doe",
-		"Body.UserAccount": "john.doe",
-		"Body.ActivationURL": "https://google.com",
-        "Footer.Name": "Customer Service"
+		"Header.Name": "` + testDataET["header-name"] + `",
+		"Body.UserAccount": "` + testDataET["body-user-account"] + `",
+		"Body.ActivationURL": "` + testDataET["body-activation-url"] + `",
+        "Footer.Name": "` + testDataET["footer-name"] + `"
 	},
-	"processingType": "SYNC"
+	"processingType": "` + testData["processing-type"] + `"
 }`
 
 	// setup echo
@@ -350,6 +440,12 @@ func TestEmail_SendEmail(t *testing.T) {
 
 	if assert.NoError(t, email.SendEmail(c)) {
 		assert.Equal(t, http.StatusOK, res.Code)
+		// save to test-data
+		// save result for next test
+		viper.Set("test-data.email.email.interface-layer.features.send.response.json", res.Body.String())
+		if err := viper.WriteConfig(); err != nil {
+			t.Errorf("Error: viper.WriteConfig(), %s", err.Error())
+		}
 		t.Logf("RESPONSE.Email.SendEmail: %s", res.Body.String())
 	}
 }
