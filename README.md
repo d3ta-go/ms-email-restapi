@@ -1,4 +1,4 @@
-# ms-email-restapi
+# ms-email-restapi ( [![Go Report Card](https://goreportcard.com/badge/github.com/d3ta-go/ms-email-restapi)](https://goreportcard.com/report/github.com/d3ta-go/ms-email-restapi) )
 
 MicroService Interface/Presentation App: Email RestAPI
 
