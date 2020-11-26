@@ -111,6 +111,8 @@ URL: http://localhost:20201/openapis/docs/index.html
 2. Common System Libraries - [d3ta-go/system](https://github.com/d3ta-go/system)
 3. Need JWT Authorization/Token from: Account (Generic Subdomain) Module/Account REST API - [d3ta-go/ms-account-restapi](https://github.com/d3ta-go/ms-account-restapi). `Please use shared redis server to store/retrieve JWT Token.`
 
+4. Email GraphQL API Microservice - [d3ta-go/ms-email-graphql-api](https://github.com/d3ta-go/ms-email-graphql-api)
+
 **Online Demo:\***
 
 > URL: **https://ms-email-d3tago-demo.mhs.web.id/openapis/docs/index.html**
