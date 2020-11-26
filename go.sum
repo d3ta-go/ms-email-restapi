@@ -70,6 +70,8 @@ github.com/d3ta-go/ddd-mod-email v0.0.3 h1:4Zp0JcOHI43f2XtZ/yUXIAoh99C5f4pQ+fVUt
 github.com/d3ta-go/ddd-mod-email v0.0.3/go.mod h1:LGq6QvmRT93VPxB5XP6+rqJTG6Y4jNZmGY4FRX6s+e0=
 github.com/d3ta-go/ddd-mod-email v0.0.4 h1:pHWCsCbDkb+YSEXeZPY/ZyGIR9ax8f6lWbxmk5vJwDg=
 github.com/d3ta-go/ddd-mod-email v0.0.4/go.mod h1:I5xGHZJbjCG+utcvq1g4US0HOOFIcJNjfS4c1Tc3AHI=
+github.com/d3ta-go/ddd-mod-email v0.0.5 h1:d8b4ZUQZrbh10XBIYxsUEXBzoxfGLn71EvgT7dXGWw0=
+github.com/d3ta-go/ddd-mod-email v0.0.5/go.mod h1:I5xGHZJbjCG+utcvq1g4US0HOOFIcJNjfS4c1Tc3AHI=
 github.com/d3ta-go/system v0.0.0-20201104032004-6d094d17b5e0 h1:qrte0NlRgL2ZzbunagtbM567J8Wq7zTgwqScdj2MS8Q=
 github.com/d3ta-go/system v0.0.0-20201104032004-6d094d17b5e0/go.mod h1:vqjb6KXOXznmwP4EtxboOpi23eiyCSybzHD4AmEheFY=
 github.com/d3ta-go/system v0.0.0-20201105140722-f0eba07290ef h1:FHvHh4HFF4CZcEcGxu5ZPKkO2AEXS8sLyUhloqWeCbk=

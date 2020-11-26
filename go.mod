@@ -3,7 +3,7 @@ module github.com/d3ta-go/ms-email-restapi
 go 1.15
 
 require (
-	github.com/d3ta-go/ddd-mod-email v0.0.4
+	github.com/d3ta-go/ddd-mod-email v0.0.5
 	github.com/d3ta-go/system v0.0.13
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
